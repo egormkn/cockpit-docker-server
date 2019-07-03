@@ -50,6 +50,8 @@ ssh egor@my-public-ip
 
 # https://nginx.org/ru/linux_packages.html#Ubuntu
 
+# Install nginx from ubuntu repository for compatibility
+sudo apt install nginx
 # Add NGINX's official GPG key
 curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
 # Set up the repository
@@ -77,7 +79,7 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 # Install the latest version of Docker
 sudo apt install docker-ce docker-ce-cli containerd.io
 # Check docker service status
-systemctl status nginx
+systemctl status docker
 ```
 
 
@@ -119,7 +121,8 @@ docker-gen --version
 # https://cockpit-project.org/running.html#ubuntu
 
 # Install the latest version of cockpit from backports
-sudo apt install cockpit/bionic-backports cockpit-docker/bionic-backports cockpit-packagekit/bionic-backports
+sudo apt install cockpit cockpit-docker
+sudo apt install cockpit/bionic-backports cockpit-docker/bionic-backports
 ```
 
 ```bash
@@ -161,6 +164,7 @@ sudo cp -R etc/ /
 # Set domain name in configuration file
 sudo sed -i "s/cockpit.example.com/$DOMAIN/g" /etc/nginx/sites-available/cockpit
 # Enable cockpit server block
+sudo mkdir /etc/nginx/sites-enabled/
 sudo ln -sfn /etc/nginx/sites-available/cockpit /etc/nginx/sites-enabled/
 # Setup SSL for cockpit
 sudo certbot certonly --nginx -d $DOMAIN
