@@ -8,21 +8,21 @@ upstream websocket {
 }
 
 server {
-    # if ($host = example.com) {
+    # if ($host = cockpit.example.com) {
     #     return 301 https://$host$request_uri;
     # } 
 
     listen         80;
-    server_name    example.com www.example.com;
+    server_name    cockpit.example.com www.cockpit.example.com;
     return         301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl;
-    server_name example.com www.example.com;
+    server_name cockpit.example.com www.cockpit.example.com;
 
-    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/cockpit.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/cockpit.example.com/privkey.pem;
 
     location / {
         proxy_pass http://websocket;

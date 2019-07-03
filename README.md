@@ -137,27 +137,40 @@ sudo apt install certbot python-certbot-nginx
 ```
 
 ```bash
+################
+# INSTALL BIND #
+################
+
+# Install packages
+sudo apt install bind9 bind9utils bind9-doc
+# Add firewall rule for bind9
+sudo ufw allow 'Bind9'
+```
+
+```bash
 #########
 # SETUP #
 #########
 
 # https://github.com/cockpit-project/cockpit/wiki/Proxying-Cockpit-over-NGINX
 
-DOMAIN="my.example.org"
+DOMAIN="cockpit.example.com"
 
 # Install all configuration files
 sudo cp -R etc/ /
 # Set domain name in configuration file
-sudo sed -i "s/example.com/$DOMAIN/g" /etc/nginx/sites-available/cockpit
+sudo sed -i "s/cockpit.example.com/$DOMAIN/g" /etc/nginx/sites-available/cockpit
 # Enable cockpit server block
 sudo ln -sfn /etc/nginx/sites-available/cockpit /etc/nginx/sites-enabled/
 # Setup SSL for cockpit
 sudo certbot certonly --nginx -d $DOMAIN
 # Enable docker server block
 sudo ln -sfn /etc/nginx/sites-available/docker /etc/nginx/sites-enabled/
-
-# Setup service (TODO)
-sudo docker-gen -only-published -watch -notify /etc/docker-gen/update.sh /etc/docker-gen/nginx.tmpl /etc/nginx/sites-available/docker
+# Reload services
+sudo systemctl daemon-reload
+# Enable docker-gen service
+sudo systemctl enable docker-gen.service
+sudo systemctl status docker-gen.service
 ```
 
 ## Additional software (Grav)
