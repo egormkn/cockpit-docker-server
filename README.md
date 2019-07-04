@@ -1,14 +1,16 @@
-# Server Setup
+# Cockpit + Docker Server Setup
+
+This tutorial will help you set up the [Ubuntu Server](https://ubuntu.com/download/server/) with [Cockpit](https://cockpit-project.org/) control panel and [Docker](https://docs.docker.com/) support.
 
 ## Prerequisites:
-- Ubuntu 18.04 with root access
-- Domain name with DNS settings available
+- Ubuntu Server 18.04 with root access
+- Domain name
 
 ## Tutorial
 
 ```bash
-# Open ssh connection as root
-ssh root@my-public-ip
+# Open ssh connection to SERVER as root
+ssh root@SERVER
 ```
 
 ```bash
@@ -22,25 +24,21 @@ USERNAME="user"
 
 # Create a new user
 adduser $USERNAME
-# Add new user to the sudo group
+# Add new user to the `sudo` group
 usermod -aG sudo $USERNAME
-# Setup firewall
-ufw app list
-ufw allow OpenSSH
-ufw enable
-# Update registry
+# Update package registry
 apt update
 # Upgrade packages
 apt upgrade
-# Install necessary packages
-sudo apt install curl gnupg2 ca-certificates lsb-release apt-transport-https gnupg-agent software-properties-common
+# Install packages required for this tutorial
+apt install git curl gnupg2 ca-certificates lsb-release apt-transport-https gnupg-agent software-properties-common
 # Reboot
 shutdown -r now
 ```
 
 ```bash
-# Open ssh connection as normal user
-ssh egor@my-public-ip
+# Open ssh connection to SERVER as normal user
+ssh user@SERVER
 ```
 
 ```bash
@@ -48,21 +46,26 @@ ssh egor@my-public-ip
 # INSTALL NGINX #
 #################
 
-# https://nginx.org/ru/linux_packages.html#Ubuntu
+# https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
 
-# Install nginx from ubuntu repository for compatibility
+# Install Nginx from Ubuntu repository for better compatibility
 sudo apt install nginx
-# Add NGINX's official GPG key
-curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
-# Set up the repository
-sudo add-apt-repository "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
-# Install package
-sudo apt install nginx
-# Add firewall rule for nginx
+```
+
+```bash
+####################
+# INSTALL FIREWALL #
+####################
+
+# Install UFW
+sudo apt install ufw
+# List network applications
 sudo ufw app list
+# Add firewall rules for SSH and Nginx 
 sudo ufw allow 'Nginx Full'
-# Check nginx service status
-systemctl status nginx
+sudo ufw allow OpenSSH
+# Enable firewall (make sure you have allowed SSH before)
+sudo ufw enable
 ```
 
 ```bash
@@ -82,25 +85,9 @@ sudo apt install docker-ce docker-ce-cli containerd.io
 systemctl status docker
 ```
 
-
-```bash
-##########################
-# INSTALL DOCKER-COMPOSE #
-##########################
-
-# https://docs.docker.com/compose/install/
-
-# Download binary release
-sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-# Allow execution
-sudo chmod +x /usr/local/bin/docker-compose
-# Check installed version
-docker-compose --version
-```
-
 ```bash
 ######################
-# INSTALL DOCKER_GEN #
+# INSTALL DOCKER-GEN #
 ######################
 
 # https://github.com/jwilder/docker-gen
@@ -120,9 +107,8 @@ docker-gen --version
 
 # https://cockpit-project.org/running.html#ubuntu
 
-# Install the latest version of cockpit from backports
+# Install cockpit and docker plugin
 sudo apt install cockpit cockpit-docker
-sudo apt install cockpit/bionic-backports cockpit-docker/bionic-backports
 ```
 
 ```bash
@@ -140,17 +126,6 @@ sudo apt install certbot python-certbot-nginx
 ```
 
 ```bash
-################
-# INSTALL BIND #
-################
-
-# Install packages
-sudo apt install bind9 bind9utils bind9-doc
-# Add firewall rule for bind9
-sudo ufw allow 'Bind9'
-```
-
-```bash
 #########
 # SETUP #
 #########
@@ -159,12 +134,20 @@ sudo ufw allow 'Bind9'
 
 DOMAIN="cockpit.example.com"
 
+# Get config files
+git clone https://github.com/egormkn/cockpit-docker-server.git
+cd cockpit-docker-server
 # Install all configuration files
 sudo cp -R etc/ /
+# Allow execution of update script
+sudo chmod +x /etc/docker-gen/update.sh
 # Set domain name in configuration file
 sudo sed -i "s/cockpit.example.com/$DOMAIN/g" /etc/nginx/sites-available/cockpit
-# Enable cockpit server block
+# Check that sites-enabled exists
 sudo mkdir /etc/nginx/sites-enabled/
+# Disable default server block
+sudo rm -f /etc/nginx/sites-enabled/default
+# Enable cockpit server block
 sudo ln -sfn /etc/nginx/sites-available/cockpit /etc/nginx/sites-enabled/
 # Setup SSL for cockpit
 sudo certbot certonly --nginx -d $DOMAIN
@@ -177,25 +160,15 @@ sudo systemctl enable docker-gen.service
 sudo systemctl status docker-gen.service
 ```
 
-## Additional software (Grav)
+## Run Docker containers with domain name
 
-```
-wget https://github.com/getgrav/grav/releases/download/1.6.9/grav-admin-v1.6.9.zip
-sudo unzip grav-admin-v1.6.9.zip -d /etc/grav/
-sudo chown -R www-data:www-data /etc/grav/grav-admin
-
-sudo docker run -e VIRTUAL_HOST=ocean.gear.su -v /etc/grav/grav-admin:/var/www/html:cached -p 8000:80/tcp grav:latest
+```bash
+sudo docker run -e VIRTUAL_HOST=test.cockpit.example.com -P -d nginxdemos/hello
 ```
 
-Add certificates to template:
-```
-certonly --standalone
-```
-
-
+## Useful links
 https://tutorials.technology/tutorials/30-how-to-use-nginx-reverse-proxy-with-docker.html
 https://blog.ippon.tech/set-up-a-reverse-proxy-nginx-and-docker-gen-bonus-lets-encrypt/
 https://traefik.io/
 https://chrissainty.com/how-i-dockerised-my-blog/
 https://github.com/jwilder/nginx-proxy
-
