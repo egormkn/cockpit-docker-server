@@ -1,6 +1,6 @@
 # Cockpit + Docker Server Setup
 
-This tutorial will help you set up the [Ubuntu Server](https://ubuntu.com/download/server/) with [Cockpit](https://cockpit-project.org/) control panel and [Docker](https://docs.docker.com/) support.
+This tutorial will help you set up the [Ubuntu Server](https://ubuntu.com/download/server/) with [Cockpit](https://cockpit-project.org/) control panel and [Docker](https://docs.docker.com/) support. Docker containers might be associated with domain names using `VIRTUAL_HOST` environment variable. All domain names that are used with containers automatically get SSL certificates from [LetsEncrypt](https://letsencrypt.org/).
 
 ## Prerequisites:
 - Ubuntu Server 18.04 with root access
@@ -164,7 +164,11 @@ sudo systemctl status docker-gen.service
 
 ```bash
 sudo docker run -e VIRTUAL_HOST=test.cockpit.example.com -P -d nginxdemos/hello
+# Or with specified port
+sudo docker run -e VIRTUAL_HOST=test.cockpit.example.com -e VIRTUAL_PORT=3000 -P -d nginxdemos/hello
 ```
+
+For more advanced configurations please see [docker-gen](https://github.com/jwilder/docker-gen) environment variables.
 
 ## Useful links
 https://tutorials.technology/tutorials/30-how-to-use-nginx-reverse-proxy-with-docker.html
