@@ -62,10 +62,10 @@ ssh user@$SERVER
 curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
 # Set up the stable repository
 sudo add-apt-repository -y -u "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
-# Update package registry
-sudo apt update
 # Install the latest stable version of NGINX
 sudo apt install nginx
+# Reload configuration
+sudo nginx -s reload
 ```
 
 ```bash
@@ -94,8 +94,6 @@ sudo ufw enable
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 # Set up the stable repository
 sudo add-apt-repository -y -u "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-# Update package registry
-sudo apt update
 # Install the latest stable version of Docker CE
 sudo apt install docker-ce docker-ce-cli containerd.io
 ```
@@ -162,6 +160,8 @@ sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/cockpit/cockpit.conf
 sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/nginx/conf.d/cockpit.conf
 # Remove default server block that serves NGINX welcome page
 sudo rm -f /etc/nginx/conf.d/default.conf
+# Generate default NGINX certificate
+sudo openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
 # Register account for Certbot
 sudo certbot register
 # Setup SSL for cockpit
