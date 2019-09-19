@@ -147,7 +147,6 @@ sudo apt install certbot python-certbot-nginx
 
 # https://github.com/cockpit-project/cockpit/wiki/Proxying-Cockpit-over-NGINX
 # https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/
-# https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-on-centos-7
 
 DOMAIN="cockpit.domain.tld"
 
@@ -190,8 +189,9 @@ sudo docker run -e VIRTUAL_HOST=test.cockpit.example.com -e VIRTUAL_PORT=3000 -P
 For more advanced configurations please see [docker-gen](https://github.com/jwilder/docker-gen) environment variables.
 
 ## Useful links
-https://tutorials.technology/tutorials/30-how-to-use-nginx-reverse-proxy-with-docker.html
-https://blog.ippon.tech/set-up-a-reverse-proxy-nginx-and-docker-gen-bonus-lets-encrypt/
-https://traefik.io/
-https://chrissainty.com/how-i-dockerised-my-blog/
-https://github.com/jwilder/nginx-proxy
+- https://tutorials.technology/tutorials/30-how-to-use-nginx-reverse-proxy-with-docker.html
+- https://blog.ippon.tech/set-up-a-reverse-proxy-nginx-and-docker-gen-bonus-lets-encrypt/
+- https://chrissainty.com/how-i-dockerised-my-blog/
+- https://github.com/jwilder/nginx-proxy
+- https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-on-centos-7
+- https://traefik.io/
