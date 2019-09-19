@@ -6,7 +6,8 @@ I use this configuration on my virtual private server to play with any kind of d
 
 ## Screenshots
 
-TODO
+<a href="images/system.png"><img src="images/system.png" width="40%"></a>&nbsp;&nbsp;&nbsp;<a href="images/docker.png"><img src="images/docker.png" width="40%"></a>
+<a href="images/updates.png"><img src="images/updates.png" width="40%"></a>&nbsp;&nbsp;&nbsp;<a href="images/terminal.png"><img src="images/terminal.png" width="40%"></a>
 
 ## Prerequisites
 - Ubuntu Server 18.04 LTS with root access
