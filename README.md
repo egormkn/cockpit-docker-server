@@ -160,7 +160,7 @@ sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/cockpit/cockpit.conf
 sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/nginx/conf.d/cockpit.conf
 # Remove default server block that serves NGINX welcome page
 sudo rm -f /etc/nginx/conf.d/default.conf
-# Generate default NGINX certificate
+# Generate default NGINX certificate with CN=*
 sudo openssl req -x509 -nodes -days 1000 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
 # Register account for Certbot
 sudo certbot register
