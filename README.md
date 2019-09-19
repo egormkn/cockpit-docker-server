@@ -61,7 +61,7 @@ ssh user@$SERVER
 # Add NGINX official GPG key
 curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
 # Set up the stable repository
-sudo add-apt-repository "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
+sudo add-apt-repository -y -u "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
 # Update package registry
 sudo apt update
 # Install the latest stable version of NGINX
@@ -93,7 +93,7 @@ sudo ufw enable
 # Add Docker official GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 # Set up the stable repository
-sudo add-apt-repository "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo add-apt-repository -y -u "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 # Update package registry
 sudo apt update
 # Install the latest stable version of Docker CE
@@ -114,7 +114,7 @@ wget https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION
 # Extract binary executable
 sudo tar xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz -C /usr/local/bin/
 # Remove downloaded archive
-rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
+rm docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 ```
 
 ```bash
@@ -125,7 +125,7 @@ rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 # https://cockpit-project.org/running.html#ubuntu
 
 # Install Cockpit with Docker plugin
-sudo apt install cockpit cockpit-docker
+sudo apt install -t $(lsb_release -cs)-backports cockpit cockpit-docker
 ```
 
 ```bash
@@ -136,7 +136,7 @@ sudo apt install cockpit cockpit-docker
 # https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
 
 # Set up the repository
-sudo add-apt-repository ppa:certbot/certbot
+sudo add-apt-repository -y -u ppa:certbot/certbot
 # Install the latest version of certbot
 sudo apt install certbot python-certbot-nginx
 ```
@@ -162,8 +162,10 @@ sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/cockpit/cockpit.conf
 sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/nginx/conf.d/cockpit.conf
 # Remove default server block that serves NGINX welcome page
 sudo rm -f /etc/nginx/conf.d/default.conf
+# Register account for Certbot
+sudo certbot register
 # Setup SSL for cockpit
-sudo certbot certonly --nginx -d $DOMAIN
+sudo certbot run --nginx --no-redirect -d $DOMAIN
 # Allow execution of docker-gen notify script
 sudo chmod +x /etc/docker-gen/notify.sh
 # Reload services list
