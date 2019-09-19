@@ -1,16 +1,25 @@
-# Cockpit + Docker Server Setup
+# Ubuntu Server Configuration
 
-This tutorial will help you set up the [Ubuntu Server](https://ubuntu.com/download/server/) with [Cockpit](https://cockpit-project.org/) control panel and [Docker](https://docs.docker.com/) support. Docker containers might be associated with domain names using `VIRTUAL_HOST` environment variable. All domain names that are used with containers automatically get SSL certificates from [LetsEncrypt](https://letsencrypt.org/).
+This guide will help you set up the [Ubuntu Server](https://ubuntu.com/download/server/) for deploying [Docker](https://docs.docker.com/) containers, that is managed by [Cockpit](https://cockpit-project.org/) control panel. Web applications in Docker containers might be associated with domain names using `VIRTUAL_HOST` environment variable. All domain names that are used with containers automatically get free SSL certificates from [LetsEncrypt](https://letsencrypt.org/).
 
-## Prerequisites:
-- Ubuntu Server 18.04 with root access
+I use this configuration on my virtual private server to play with any kind of dockerized applications. I will be glad if you find this guide useful.
+
+## Screenshots
+
+TODO
+
+## Prerequisites
+- Ubuntu Server 18.04 LTS with root access
 - Domain name
 
-## Tutorial
+## Setup
 
 ```bash
-# Open ssh connection to SERVER as root
-ssh root@SERVER
+# Set an ip address of your server
+SERVER="0.0.0.0"
+
+# Open ssh connection to $SERVER as root
+ssh root@$SERVER
 ```
 
 ```bash
@@ -20,25 +29,26 @@ ssh root@SERVER
 
 # https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04
 
+# Set the preferred username or leave it as is
 USERNAME="user"
 
-# Create a new user
+# Create a new user with specified $USERNAME
 adduser $USERNAME
 # Add new user to the `sudo` group
 usermod -aG sudo $USERNAME
 # Update package registry
 apt update
-# Upgrade packages
+# Upgrade packages to newer versions
 apt upgrade
 # Install packages required for this tutorial
-apt install git curl gnupg2 ca-certificates lsb-release apt-transport-https gnupg-agent software-properties-common
-# Reboot
+apt install git curl gnupg2 gnupg-agent lsb-release apt-transport-https software-properties-common
+# Reboot server
 shutdown -r now
 ```
 
 ```bash
-# Open ssh connection to SERVER as normal user
-ssh user@SERVER
+# Open ssh connection to $SERVER as normal user
+ssh user@$SERVER
 ```
 
 ```bash
@@ -46,9 +56,15 @@ ssh user@SERVER
 # INSTALL NGINX #
 #################
 
-# https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04
+# https://www.nginx.com/resources/wiki/start/topics/tutorials/install/
 
-# Install Nginx from Ubuntu repository for better compatibility
+# Add NGINX official GPG key
+curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
+# Set up the stable repository
+sudo add-apt-repository "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
+# Update package registry
+sudo apt update
+# Install the latest stable version of NGINX
 sudo apt install nginx
 ```
 
@@ -59,11 +75,10 @@ sudo apt install nginx
 
 # Install UFW
 sudo apt install ufw
-# List network applications
-sudo ufw app list
-# Add firewall rules for SSH and Nginx 
-sudo ufw allow 'Nginx Full'
-sudo ufw allow OpenSSH
+# Add firewall rules for HTTP, HTTPS and SSH
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw allow ssh
 # Enable firewall (make sure you have allowed SSH before)
 sudo ufw enable
 ```
@@ -75,14 +90,14 @@ sudo ufw enable
 
 # https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-using-the-repository
 
-# Add Docker’s official GPG key
+# Add Docker official GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-# Set up the repository
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-# Install the latest version of Docker
+# Set up the stable repository
+sudo add-apt-repository "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+# Update package registry
+sudo apt update
+# Install the latest stable version of Docker CE
 sudo apt install docker-ce docker-ce-cli containerd.io
-# Check docker service status
-systemctl status docker
 ```
 
 ```bash
@@ -90,14 +105,16 @@ systemctl status docker
 # INSTALL DOCKER-GEN #
 ######################
 
-# https://github.com/jwilder/docker-gen
+# https://github.com/jwilder/docker-gen#installation
+
+DOCKER_GEN_VERSION="0.7.4"
 
 # Download release archive
-wget https://github.com/jwilder/docker-gen/releases/download/0.7.3/docker-gen-linux-amd64-0.7.3.tar.gz
+wget https://github.com/jwilder/docker-gen/releases/download/$DOCKER_GEN_VERSION/docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 # Extract binary executable
-sudo tar xvzf docker-gen-linux-amd64-0.7.3.tar.gz -C /usr/local/bin/
-# Check installed version
-docker-gen --version
+sudo tar xvzf docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz -C /usr/local/bin/
+# Remove downloaded archive
+rm /docker-gen-linux-amd64-$DOCKER_GEN_VERSION.tar.gz
 ```
 
 ```bash
@@ -107,7 +124,7 @@ docker-gen --version
 
 # https://cockpit-project.org/running.html#ubuntu
 
-# Install cockpit and docker plugin
+# Install Cockpit with Docker plugin
 sudo apt install cockpit cockpit-docker
 ```
 
@@ -119,7 +136,6 @@ sudo apt install cockpit cockpit-docker
 # https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx
 
 # Set up the repository
-sudo add-apt-repository universe
 sudo add-apt-repository ppa:certbot/certbot
 # Install the latest version of certbot
 sudo apt install certbot python-certbot-nginx
@@ -131,36 +147,36 @@ sudo apt install certbot python-certbot-nginx
 #########
 
 # https://github.com/cockpit-project/cockpit/wiki/Proxying-Cockpit-over-NGINX
+# https://docs.nginx.com/nginx/admin-guide/basic-functionality/managing-configuration-files/
+# https://www.digitalocean.com/community/tutorials/how-to-set-up-nginx-server-blocks-on-centos-7
 
-DOMAIN="cockpit.example.com"
+DOMAIN="cockpit.domain.tld"
 
-# Get config files
+# Get configuration files
 git clone https://github.com/egormkn/cockpit-docker-server.git
 cd cockpit-docker-server
-# Install all configuration files
-sudo cp -R etc/ /
-# Allow execution of update script
-sudo chmod +x /etc/docker-gen/update.sh
-# Set domain name in configuration file
-sudo sed -i "s/cockpit.example.com/$DOMAIN/g" /etc/nginx/sites-available/cockpit
-# Check that sites-enabled exists
-sudo mkdir /etc/nginx/sites-enabled/
-# Disable default server block
-sudo rm -f /etc/nginx/sites-enabled/default
-# Enable cockpit server block
-sudo ln -sfn /etc/nginx/sites-available/cockpit /etc/nginx/sites-enabled/
+# Copy all configuration files to system
+sudo cp -r etc/ /
+# Set domain name in configuration files
+sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/cockpit/cockpit.conf
+sudo sed -i "s/cockpit.domain.tld/$DOMAIN/g" /etc/nginx/conf.d/cockpit.conf
+# Remove default server block that serves NGINX welcome page
+sudo rm -f /etc/nginx/conf.d/default.conf
 # Setup SSL for cockpit
 sudo certbot certonly --nginx -d $DOMAIN
-# Enable docker server block
-sudo ln -sfn /etc/nginx/sites-available/docker /etc/nginx/sites-enabled/
-# Reload services
+# Allow execution of docker-gen notify script
+sudo chmod +x /etc/docker-gen/notify.sh
+# Reload services list
 sudo systemctl daemon-reload
 # Enable docker-gen service
 sudo systemctl enable docker-gen.service
-sudo systemctl status docker-gen.service
+# Reboot server
+sudo shutdown -r now
 ```
 
-## Run Docker containers with domain name
+## Usage
+
+### Run Docker containers with domain name
 
 ```bash
 sudo docker run -e VIRTUAL_HOST=test.cockpit.example.com -P -d nginxdemos/hello

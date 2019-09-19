@@ -6,7 +6,7 @@ Requires=docker.service
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/docker-gen -only-published -watch -notify /etc/docker-gen/update.sh /etc/docker-gen/nginx.tmpl /etc/nginx/sites-available/docker
+ExecStart=/usr/local/bin/docker-gen -config /etc/docker-gen/docker-gen.conf
 Restart=always
 
 [Install]
