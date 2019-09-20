@@ -65,8 +65,8 @@ curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
 sudo add-apt-repository -y -u "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
 # Install the latest stable version of NGINX
 sudo apt install nginx
-# Reload configuration
-sudo nginx -s reload
+# Start NGINX web server
+sudo systemctl start nginx
 ```
 
 ```bash
