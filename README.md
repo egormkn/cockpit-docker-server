@@ -53,23 +53,6 @@ ssh user@$SERVER
 ```
 
 ```bash
-#################
-# INSTALL NGINX #
-#################
-
-# https://www.nginx.com/resources/wiki/start/topics/tutorials/install/
-
-# Add NGINX official GPG key
-curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
-# Set up the stable repository
-sudo add-apt-repository -y -u "deb http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
-# Install the latest stable version of NGINX
-sudo apt install nginx
-# Start NGINX web server
-sudo systemctl start nginx
-```
-
-```bash
 ####################
 # INSTALL FIREWALL #
 ####################
@@ -82,6 +65,23 @@ sudo ufw allow https
 sudo ufw allow ssh
 # Enable firewall (make sure you have allowed SSH before)
 sudo ufw enable
+```
+
+```bash
+#################
+# INSTALL NGINX #
+#################
+
+# https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source
+
+# Add NGINX official GPG key
+curl -fsSL https://nginx.org/keys/nginx_signing.key | sudo apt-key add -
+# Set up the stable repository
+sudo add-apt-repository -y -u "deb [arch=amd64] http://nginx.org/packages/ubuntu $(lsb_release -cs) nginx"
+# Install the latest stable version of NGINX
+sudo apt install nginx
+# Start NGINX web server
+sudo nginx
 ```
 
 ```bash
