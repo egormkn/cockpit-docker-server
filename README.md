@@ -94,7 +94,7 @@ sudo nginx
 # Add Docker official GPG key
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 # Set up the stable repository
-sudo add-apt-repository -y -u "deb https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo add-apt-repository -y -u "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 # Install the latest stable version of Docker CE
 sudo apt install docker-ce docker-ce-cli containerd.io
 ```
